@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import subprocess
+import sys
 
 week=["s","m","t","w","t","f","s"]
 
@@ -21,12 +22,9 @@ def print_table(table):
 	row_format ="{:>3}" * (len(week) + 1)
 
 	for row in table:
-		print row_format.format("",*row)
+                print (row_format.format("",*row))
 
-
-
-def print_month(month,year,today):
-
+def create_month(month,year,today,tmonth):
 	table=create_table()
 
 	table[0]=week
@@ -36,30 +34,52 @@ def print_month(month,year,today):
 	wd=0
 	enday=calendar.monthrange(year,month)[1]
 
-	while (d < enday+1):
-		if calendar.weekday(year, month, d)+1<7:
+	if calendar.weekday(year, month, d)+1<7:
 			wd = calendar.weekday(year, month, d)+1
-		else:
-			wd = 0
+	else:
+		wd=0
+
+	while (d < enday+1):
 
 		table[j][wd]=d
 
-		if d==today:
+		if d==today and month==tmonth:
 			table[j][wd]="\033[47;30m "+str(d)+"\033[m"
 		d=d+1
+		wd=wd+1
 
-		if wd==6:
+		if wd==7:
 		   j=j+1
+		   wd=0
 
-	print "     "+month_lst[month-1]+" "+str(year)
+	return table
+
+def print_month(month,year,today,tmonth):
+
+	table=create_month(month,year,today,tmonth)
+
+	print ("     "+month_lst[month-1]+" "+str(year))
 	print_table(table)
+
+def print_year(year,today,tmonth):
+	print ("     "+str(year))
+	for m in range(1,13):
+		print_month(m,year,today,tmonth)
 
 
 def main():
 	today=datetime.date.today()
 	y=today.year
 	m=today.month
-	print_month(m,y,today.day)
 
-
+	"""
+	print_month(m,y,today.day,m)
+	"""
+	print sys.argv
+	if len(sys.argv)==1:
+		print_month(m,y,today.day,m)
+	elif len(sys.argv)==2:
+		print_year(int(sys.argv[1]),today.day,m)
+	elif len(sys.argv)==3:
+		print_month(int(sys.argv[1]),int(sys.argv[2]),today.day,m)
 main()
